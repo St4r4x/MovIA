@@ -3,7 +3,7 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    # Ajoutez des champs supplémentaires si nécessaire
+    location = models.CharField(max_length=100, blank=True, null=True)
     groups = models.ManyToManyField(
         'auth.Group',
         verbose_name='groups',
