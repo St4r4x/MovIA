@@ -20,10 +20,11 @@ config = AutoConfig(BASE_DIR)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-SECRET_KEY = config('SECRET_KEY')
+#SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = 'django-insecure-usbhmt2$tpz%ceq0w!8dvwpe+98uqjt0sz$hwu$r+$l@vqxpi9'
 
-DEBUG = config('DEBUG', default=False, cast=bool)
-
+#DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = True
 ALLOWED_HOSTS = []
 
 

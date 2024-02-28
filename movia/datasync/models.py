@@ -3,26 +3,42 @@ import os
 import requests
 from django.db import models
 from dotenv import load_dotenv
-
-load_dotenv(dotenv_path='.env.local')
-
-def get_movie_info(movie_id):
-    api_key = os.getenv('TMDB_API_KEY')
-    response = requests.get(f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=fr-FR')
-    data = response.json()
-    return data
-
-def get_tv_series_info(serie_id):
-    api_key = os.getenv('TMDB_API_KEY')
-    response = requests.get(f'https://api.themoviedb.org/3/tv/{serie_id}?api_key={api_key}&language=fr-FR')
-    data = response.json()
-    return data
-
 from recommendations.models import (Genre, Movie, ProductionCompany,
                                     ProductionCountry, Serie, SpokenLanguage)
 
+load_dotenv(dotenv_path='.env.local')
+
+def get_content_info(content_id, content_type):
+    """
+    Retrieves information about a movie from The Movie Database (TMDB) API.
+
+    Args:
+        movie_id (int): The ID of the movie.
+
+    Returns:
+        dict: A dictionary containing the movie information.
+
+    Raises:
+        None
+    """
+    api_key = os.getenv('TMDB_API_KEY')
+    response = requests.get(f'https://api.themoviedb.org/3/{content_type}/{content_id}?api_key={api_key}&language=fr-FR')
+    # Vérifier que la requête a réussi
+    if response.status_code == 200:
+        data = response.json()
+    return data
+
 
 def update_database_with_movie(movie_data):
+    """
+    Met à jour la base de données avec les informations d'un film.
+
+    Args:
+        movie_data (dict): Les données du film à mettre à jour.
+
+    Returns:
+        tuple: Un tuple contenant l'objet Movie mis à jour et un booléen indiquant si le film a été créé ou non.
+    """
     # Créer les genres
     genres = [Genre.objects.get_or_create(id=genre_data['id'], defaults={'name': genre_data['name']})[0] for genre_data in movie_data['genres']]
 
@@ -68,12 +84,42 @@ def update_database_with_movie(movie_data):
         movie.production_countries.set(production_countries)
         movie.spoken_languages.set(spoken_languages)
 
-def update_database_with_serie(serie_data):
-    Serie.objects.create(
-        title=serie_data['title'],
-        description=serie_data['overview'],
-        # Ajoutez d'autres champs ici
-    )
+def update_database_with_serie(series_data):
+    # Récupérer ou créer la série
+    serie, created = Serie.objects.get_or_create(id=series_data['id'], defaults={
+        'backdrop_path': series_data['backdrop_path'],
+        'homepage': series_data['homepage'],
+        'original_language': series_data['original_language'],
+        'original_title': series_data['original_name'],
+        'overview': series_data['overview'],
+        'popularity': series_data['popularity'],
+        'poster_path': series_data['poster_path'],
+        'release_date': series_data['first_air_date'],
+        'status': series_data['status'],
+        'title': series_data['name'],
+        'vote_average': series_data['vote_average'],
+        'vote_count': series_data['vote_count'],
+    })
+
+    # Si la série a été créée, ajouter les relations
+    if created:
+        for genre_data in series_data['genres']:
+            genre, _ = Genre.objects.get_or_create(id=genre_data['id'], defaults={'name': genre_data['name']})
+            serie.genres.add(genre)
+
+        for company_data in series_data['production_companies']:
+            company, _ = ProductionCompany.objects.get_or_create(id=company_data['id'], defaults={'name': company_data['name']})
+            serie.production_companies.add(company)
+
+        for country_data in series_data['production_countries']:
+            country, _ = ProductionCountry.objects.get_or_create(iso_3166_1=country_data['iso_3166_1'], defaults={'name': country_data['name']})
+            serie.production_countries.add(country)
+
+        for language_data in series_data['spoken_languages']:
+            language, _ = SpokenLanguage.objects.get_or_create(iso_639_1=language_data['iso_639_1'], defaults={'name': language_data['name']})
+            serie.spoken_languages.add(language)
+
+        serie.save()
     
 def update_database_with_tmdb_info():
     """
@@ -89,8 +135,8 @@ def update_database_with_tmdb_info():
     None
     """
     for i in range(1, 100):  # Remplacez cette plage par la plage de IDs de films que vous voulez récupérer
-        movie_data = get_movie_info(i)
-        serie_data = get_tv_series_info(i)
+        movie_data = get_content_info(i, 'movie')
+        serie_data = get_content_info(i, 'tv')
         update_database_with_movie(movie_data)
         update_database_with_serie(serie_data)
 

@@ -56,5 +56,22 @@ class Recommendation(models.Model):
     # Ajoutez d'autres champs en fonction de vos besoins
     
 class Serie(models.Model):
-    title = models.CharField(max_length=200)
-    description = models.TextField()
+    id = models.IntegerField(primary_key=True)
+    backdrop_path = models.CharField(max_length=255, null=True)
+    homepage = models.URLField(null=True)
+    original_language = models.CharField(max_length=2)
+    original_title = models.CharField(max_length=255)
+    overview = models.TextField()
+    popularity = models.FloatField()
+    poster_path = models.CharField(max_length=255, null=True)
+    release_date = models.DateField()
+    status = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    vote_average = models.FloatField()
+    vote_count = models.IntegerField()
+
+    # Relations
+    genres = models.ManyToManyField(Genre)
+    production_companies = models.ManyToManyField(ProductionCompany)
+    production_countries = models.ManyToManyField(ProductionCountry)
+    spoken_languages = models.ManyToManyField(SpokenLanguage)
