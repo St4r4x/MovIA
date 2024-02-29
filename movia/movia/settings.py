@@ -16,18 +16,18 @@ from decouple import AutoConfig
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 config = AutoConfig(BASE_DIR)
-
+NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd"
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-#SECRET_KEY = config('SECRET_KEY')
-SECRET_KEY = 'django-insecure-usbhmt2$tpz%ceq0w!8dvwpe+98uqjt0sz$hwu$r+$l@vqxpi9'
+SECRET_KEY = config('SECRET_KEY')
 
-#DEBUG = config('DEBUG', default=False, cast=bool)
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = []
-
-
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+TAILWIND_APP_NAME = 'theme'
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'users',
     'recommendations',
     'datasync',
+    'tailwind',
+    'theme',
+    'django_browser_reload',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = 'movia.urls'
@@ -57,7 +61,7 @@ ROOT_URLCONF = 'movia.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'movia' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

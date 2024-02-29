@@ -1,10 +1,11 @@
 # Ignorer les fichiers de configuration de l'environnement Python
-.env/
+.venv/
 *.pyc
 __pycache__/
 *.pyo
 *.pyd
 *~
+.env
 
 # Ignorer les fichiers spécifiques à Django
 *.log
